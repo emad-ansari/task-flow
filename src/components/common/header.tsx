@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -21,11 +21,14 @@ export default function Header() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 	const [activeFilters, setActiveFilters] = useState<string[]>([]);
+	const { pathname } = useLocation();
 
-	const breadcrumbs: BreadcrumbItem[] = [
-		{ label: "TaskFlow", href: "/tasks" },
-		{ label: "dashboard", href: "/dashboard" },
-	];
+	const [breadcrumbs, setBreadCrumbs] = useState<BreadcrumbItem[]>([
+		{
+			label: "TaskFlow",
+			href: "/dashboard",
+		},
+	]);
 
 	const handleClearSearch = () => {
 		setSearchQuery("");
@@ -39,6 +42,23 @@ export default function Header() {
 			setActiveFilters((prev) => [...prev, todayFilter]);
 		}
 	};
+
+	const handleBreadCrumbs = () => {
+		const newPath = {
+			label: `${pathname.slice(1).charAt(0).toUpperCase() + pathname.slice(2)}`,
+			href: pathname,
+		};
+		const updatedBreadCrumbs = [...breadcrumbs];
+		if (updatedBreadCrumbs.length > 1) {
+			updatedBreadCrumbs.pop();
+		}
+		updatedBreadCrumbs.push(newPath);
+		setBreadCrumbs(updatedBreadCrumbs)
+	};
+
+	useEffect(() => {
+		handleBreadCrumbs();
+	}, [pathname]);
 
 	return (
 		<>
@@ -73,7 +93,7 @@ export default function Header() {
 							placeholder="Search tasks, projects, people..."
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
-							className="pl-10 pr-10 h-9 bg-gray-50 dark:bg-[#1F1F23] border-gray-200 dark:border-[#2B2B30]"
+							className="pl-10 pr-10 h-9 bg-gray-50 dark:bg-[#1F1F23] border-gray-200 dark:border-[#2B2B30] rounded-xl"
 						/>
 						{searchQuery && (
 							<button
